@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Dashboard</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .sidebar h2 {
+            color: #28a745;
+            margin-bottom: 30px;
+        }
+        .sidebar p {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            margin-bottom: 15px;
+            display: block;
+            font-weight: bold;
+        }
+        .sidebar a:hover {
+            text-decoration: underline;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 40px;
+        }
+        .content h3 {
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        .notification-badge {
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 5px 10px;
+            font-size: 12px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .btn-green {
+            background-color: #28a745;
+            border: none;
+            padding: 10px 20px;
+            color: white;
+            border-radius: 5px;
+        }
+        .btn-green:hover {
+            background-color: #218838;
+        }
+        .withdraw-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        .toggle-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: #343a40;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 25px;
+  margin-right: 10px;
+}
+
+.toggle-switch input {
+  display: none;
+}
+
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #28a745;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+.toggle-text {
+  color: white;
+  font-size: 14px;
+}
+
+.toggle-text strong {
+  font-size: 16px;
+  color: white;
+}
+
+.toggle-subtext {
+  color: #28a745;
+}
+
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div>
+            <h2>Driver Dashboard</h2>
+            <p><strong>Hi, </strong> <span id="driver-name"></span></p>
+            <style>hr {
+                border: 1px solid white;
+            }
+            </style><hr>
+            <p><strong>Celo Wallet:</strong> <span id="celo-wallet" style="font-size: 8.8px;"></span></p>
+          <p><strong>Balance:</strong> <span id="celo-balance" ">Loading...</span></p>
+
+
+
+          <div class="toggle-container">
+            <label class="toggle-switch">
+              <input type="checkbox" id="availability-toggle"  onchange="toggleAvailability()">
+              <span class="slider"></span>
+            </label>
+            <div class="toggle-text">
+              <strong>Receive A Passengers</strong> <br>
+              <span class="toggle-subtext">Make Yourself Available</span>
+            </div>
+          </div>
+          
+<!-- Ride Request Modal -->
+<div id="ride-request-modal" class="modal" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">New Ride Request</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Pickup Location:</strong> <span id="pickup-location"></span></p>
+          <p><strong>Dropoff Location:</strong> <span id="dropoff-location"></span></p>
+          <p><strong>Distance:</strong> <span id="ride-distance"></span></p>
+          <p><strong>Fare:</strong> <span id="ride-fare"></span></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" onclick="acceptRide()">Accept</button>
+          <button type="button" class="btn btn-danger" onclick="declineRide()">Decline</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+
+        <span id="availability-status" >Receive Requests</span>
+        <hr style="color: rgb(236, 229, 229);">
+        <a href="#" onclick="viewRideRequests()">View Ride Requests <span class="notification-badge" id="notification-count">0</span></a>
+        <a href="#" onclick="viewCompletedRides()">View Completed Rides</a>
+        <style>hr {
+            border: 1px solid white;
+        }
+        </style><hr>
+        
+        
+        <p><strong>Car Name </strong> <span id="car-name"></span></p>
+
+        <p><strong>License Plate Number:</strong> <span id="plate-number"></span></p>
+      <p><strong>Country:</strong> <span id="country" "></span></p>
+
+</div>
+
+        <a href="#" class="btn btn-danger" onclick="logout()">Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <h3>Welcome to Your Dashboard</h3>
+        <div id="ride-requests-section">
+            <h4>Ride Requests</h4>
+            <ul id="requests-list"></ul>
+        </div>
+        <div id="withdraw-section" class="withdraw-section">
+            <h4>Withdraw Balance</h4>
+            <p>Withdraw your balance to local currency based on your country.</p>
+            <button class="btn-green" onclick="withdrawCelo()">Withdraw Your Celo Coin</button>
+        </div>
+        <div id="completed-rides-section" class="mt-5">
+            <h4>Completed Rides</h4>
+            <ul id="completed-list"></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+
+
+
+
+    // Assume these are set after login
+    const driverId = localStorage.getItem('driverId');
+    const token = localStorage.getItem('jwtToken');
+
+    if (!driverId || !token) {
+        alert("Driver not logged in. Redirecting to login page.");
+        window.location.href = "/driver-login";
+    }
+
+    // Fetch and display driver details
+    document.getElementById('driver-name').textContent = localStorage.getItem('fullName');
+    document.getElementById('celo-wallet').textContent = localStorage.getItem('celoWallet');
+document.getElementById('car-name').textContent = localStorage.getItem('carName');
+    document.getElementById('plate-number').textContent = localStorage.getItem('plateNumber');
+    document.getElementById('country').textContent = localStorage.getItem('country');
+
+
+
+
+    // Function to fetch Celo balance
+    async function fetchCeloBalance() {
+        const response = await fetch('/users/balance', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ address: localStorage.getItem('celoWallet') })
+        });
+        const data = await response.json();
+        document.getElementById('celo-balance').textContent = `${data.balance} CELO`;
+    }
+    fetchCeloBalance();
+
+    // Function to handle ride request notifications
+    function getNewRideNotifications() {
+        fetch(`/drivers/view-requests?driverId=${driverId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const notificationCount = data.length;
+            document.getElementById('notification-count').textContent = notificationCount > 0 ? notificationCount : '0';
+        })
+        .catch(error => console.error('Error fetching notifications:', error));
+    }
+
+    // Real-time polling for new requests every 30 seconds
+    setInterval(getNewRideNotifications, 30000);
+
+
+   // Fetch driver info on page load and set the availability toggle
+document.addEventListener('DOMContentLoaded', function () {
+    fetchDriverInfo();
+});
+
+function fetchDriverInfo() {
+    fetch('/drivers/info', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('driver-name').textContent = data.fullName;
+        document.getElementById('celo-wallet').textContent = data.celoWallet;
+        document.getElementById('celo-balance').textContent = data.balance + ' CELO';
+        document.getElementById('car-name').textContent = data.carName;
+        document.getElementById('plate-number').textContent = data.plateNumber;
+        document.getElementById('country').textContent = data.country;
+
+        // Set the toggle to reflect the current online status
+        const toggle = document.getElementById('availability-toggle');
+        toggle.checked = data.online;  // Set the toggle based on the driver's online status
+        document.getElementById('availability-status').textContent = data.online ? 'Online' : 'Offline';
+    })
+    .catch(error => console.error('Error fetching driver info:', error));
+}
+
+function toggleAvailability() {
+    const toggle = document.getElementById('availability-toggle');
+    const isOnline = toggle.checked;  // True if checked, false if unchecked
+    
+    fetch('/drivers/toggle-availability', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`  // Ensure the JWT token is present
+        },
+        body: JSON.stringify({ online: isOnline })  // Send the new online status to the backend
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to update availability');
+        }
+        return response.json();
+    })
+    .then(data => {
+        document.getElementById('availability-status').textContent = isOnline ? 'Online' : 'Offline';
+        alert(`You are now ${isOnline ? 'online' : 'offline'}`);
+    })
+    .catch(error => {
+        console.error('Error toggling availability:', error);
+        alert('Failed to update availability');
+    });
+}
+
+
+
+    // Function to view ride requests
+function viewRideRequests() {
+    fetch(`/drivers/view-requests?driverId=${driverId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.length > 0) {
+            const request = data[0];  // Assuming we show one request at a time
+            showRideRequestModal(request);
+        }
+    })
+    .catch(error => alert('Error fetching ride requests'));
+}
+
+
+    // Function to view completed rides
+    function viewCompletedRides() {
+        fetch(`/drivers/completed-rides?driverId=${driverId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const completedList = document.getElementById('completed-list');
+            completedList.innerHTML = '';
+            if (data.length === 0) {
+                completedList.innerHTML = '<li>No completed rides</li>';
+            } else {
+                data.forEach(ride => {
+                    const li = document.createElement('li');
+                    li.textContent = `Pickup: ${ride.pickupLocation}, Dropoff: ${ride.dropoffLocation}, Fare: ${ride.fare}`;
+                    completedList.appendChild(li);
+                });
+            }
+        })
+        .catch(error => alert('Error fetching completed rides'));
+    }
+
+    // Function to withdraw Celo balance
+    function withdrawCelo() {
+        fetch('/drivers/withdraw', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                driverId,
+                amount: parseFloat(document.getElementById('celo-balance').textContent)
+            })
+        })
+        .then(response => response.json())
+        .then(data => alert(data.message))
+        .catch(error => alert('Error withdrawing balance'));
+    }
+
+    // Function to logout
+    function logout() {
+        localStorage.removeItem('jwtToken');
+        localStorage.removeItem('driverId');
+        localStorage.removeItem('driverName');
+        localStorage.removeItem('celoWallet');
+        window.location.href = '/driver-login';
+    }
+</script>
+
+</body>
+</html>
